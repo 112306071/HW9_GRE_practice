@@ -24,7 +24,14 @@
 - **禁止**：前端框架（React、Vue⋯）、CDN 外部資源、npm 套件、任何 build 工具。
 - **禁止用 `fetch` 讀取 JSON**（在 file:// 下會被瀏覽器擋住）。所有資料都寫成 `.js` 檔，掛在全域物件 `window.GRE_DATA` 上。
 - 共用邏輯集中在 `assets/app.js`，共用樣式集中在 `assets/style.css`。頁面 HTML 中不寫 `<style>` 區塊，也不寫行內 `style="..."`。
-- 學習進度（如「不熟」標記、最佳成績）使用 `localStorage`，key 一律以 `gre-vocab:` 開頭，例如 `gre-vocab:unfamiliar`。讀寫都要包在 `try/catch` 裡，讀不到時網站仍要正常運作。
+- 學習進度使用 `localStorage`，key 一律以 `gre-vocab:` 開頭。讀寫一律透過 `app.js` 的 `store.get()` / `store.set()`（已包好 `try/catch`），讀不到時網站仍要正常運作。目前使用的 key：
+
+  | key | 內容 |
+  |---|---|
+  | `gre-vocab:unfamiliar` | 不熟單字的陣列，例如 `["abate", "wane"]` |
+  | `gre-vocab:best-score` | 各範圍的最佳成績（百分比），例如 `{ "all": 80, "unit-01": 100 }` |
+
+  新增 key 時要加到上表。
 
 ---
 
@@ -47,7 +54,8 @@ gre-vocab/
 │   └── check-data.js       資料檢查腳本：node scripts/check-data.js
 ├── AGENTS.md               本文件（給所有 AI agent 的規則）
 ├── CLAUDE.md               Claude Code 入口，內容為 @AGENTS.md
-└── README.md               給人看的專案介紹與網站連結
+├── README.md               給人看的專案介紹與網站連結
+└── .gitignore
 ```
 
 每個檔案的職責固定，**不要新增上表以外的資料夾**；若確實需要，先更新本節再新增。
@@ -75,7 +83,7 @@ gre-vocab/
 ```js
 window.GRE_DATA = window.GRE_DATA || {};
 window.GRE_UNITS = [
-  { id: "unit-01", title: "減弱與加劇", desc: "描述程度變強或變弱的動詞" },
+  { id: "unit-01", title: "減弱與加劇", desc: "描述程度變強或變弱的字" },
   { id: "unit-02", title: "讚美與批評", desc: "表達正面或負面評價的字" }
 ];
 ```
@@ -93,8 +101,8 @@ window.GRE_DATA["unit-01"] = {
       pos: "v.",
       zh: "減弱；減退",
       en: "to become less intense or widespread",
-      example: "The storm finally **abated** after midnight.",
-      exampleZh: "暴風雨在午夜過後終於減弱了。",
+      example: "After raging for hours, the storm finally **abated** around midnight.",
+      exampleZh: "肆虐了好幾個小時後，暴風雨終於在午夜前後減弱了。",
       synonyms: ["subside", "wane", "ebb"],
       antonyms: ["intensify"],
       level: 2
@@ -106,11 +114,13 @@ window.GRE_DATA["unit-01"] = {
       sentence: "Although the protests had ____ by evening, the city remained tense.",
       options: ["abated", "escalated", "commenced", "persisted", "proliferated"],
       answer: [0],
-      explain: "Although 表示轉折：抗議「減弱」了，但城市仍緊張。"
+      explain: "Although 表示轉折：抗議到了晚上已經「減弱」，城市卻仍然緊張，所以選 abated。"
     }
   ]
 };
 ```
+
+> 以上範例取自實際的 `data/units/unit-01.js`，完全符合下方所有規則，新增內容時可以直接照這個格式寫。
 
 ### 5.3 單字欄位規則
 
@@ -123,7 +133,7 @@ window.GRE_DATA["unit-01"] = {
 | `example` | ✅ | 一個完整英文例句，**目標字必須用 `**` 包起來**（可為變化形，如 `**abated**`）。測驗的「例句填空」靠這個標記挖空 |
 | `exampleZh` | ✅ | 例句的繁體中文翻譯 |
 | `synonyms` | ✅ | 1–3 個同義字，全小寫，須為真實英文單字 |
-| `antonyms` | ⬜ | 0–2 個反義字；沒有就寫 `[]` |
+| `antonyms` | ✅ | 0–2 個反義字；欄位一定要有，沒有反義字就寫 `[]` |
 | `level` | ✅ | 難度 `1`（基礎）、`2`（中等）、`3`（進階） |
 | `verify` | ⬜ | 若對字義或例句沒把握，加上 `verify: true`，由使用者人工確認 |
 
@@ -186,7 +196,10 @@ window.GRE_DATA["unit-01"] = {
 - 深色模式用 `@media (prefers-color-scheme: dark)` 重新定義同一組 token，不新增其他顏色。
 - 字體：中文用系統字 `-apple-system, "PingFang TC", "Microsoft JhengHei", sans-serif`；**英文單字**用襯線字 `Georgia, "Times New Roman", serif`，營造字典感。
 - 版面：內容最大寬度 `720px` 置中；手機優先（mobile-first），在 375px 寬度下不可出現水平捲軸。
-- 元件一律使用圓角卡片（`border-radius: 12px`）與輕陰影，按鈕最小高度 44px（方便手機點擊）。
+- 圓角：卡片與面板用 `var(--radius)`（12px）；按鈕、選項、輸入框用 `var(--radius-sm)`（8px）。
+- 陰影用 `var(--shadow)`；間距用 `--space-1`～`--space-7`（4px～48px），不要寫死 px。
+- 淡色背景（例如答對的淡綠）用 `color-mix()` 從 token 衍生，已定義好的有 `--primary-soft`、`--accent-soft`、`--correct-soft`、`--wrong-soft`、`--line`（邊框）。
+- 按鈕最小高度 44px（方便手機點擊），使用既有的 `.btn` + `.btn-primary` / `.btn-ghost`。
 
 ### 7.2 頁面骨架（每個 HTML 頁面都必須相同）
 
@@ -214,6 +227,26 @@ window.GRE_DATA["unit-01"] = {
 
 - 單元資料檔由 `app.js` 依 `GRE_UNITS` 動態載入，**不要在 HTML 手動加 `<script src="data/units/...">`**。
 - 導覽列項目定義在 `app.js` 的 `NAV` 陣列中，是唯一來源。
+
+### 7.3 `app.js` 結構（修改功能前先看這裡找位置）
+
+| 區塊 | 主要函式 | 用途 |
+|---|---|---|
+| 設定 | `NAV`、`POS_LABEL`、`LEVEL_LABEL`、`AUTO_LABEL` | 導覽列與各種顯示文字 |
+| 小工具 | `escapeHtml()`、`emphasize()`、`renderBlank()`、`shuffle()` | 輸出 HTML 前一律用 `escapeHtml()` 跳脫 |
+| localStorage | `store`、`getUnfamiliar()`、`setUnfamiliar()` | 學習進度 |
+| 單元資料 | `loadAllUnits()`、`getWords(scope)`、`getQuestions(scope)` | `scope` 為 `"all"` 或單元 id |
+| 首頁 | `initHome()` | 統計與單元列表 |
+| 單字小卡 | `initFlashcards()` | 牌組、翻面、標記不熟 |
+| 題目練習 | `pickDistractors()`、`makeAutoQuestion()`、`makeCustomQuestion()`、`buildQuiz()`、`initQuiz()` | 出題、作答、計分 |
+| 對外介面 | `window.GRE = { ... }` | 頁面呼叫的初始化函式都要在這裡匯出 |
+
+每個頁面的 `initXxx()` 開頭固定為：
+
+```js
+renderNav();
+await loadAllUnits();
+```
 
 ---
 
@@ -244,12 +277,20 @@ window.GRE_DATA["unit-01"] = {
 ### 8.4 新增一個功能頁面（例如「錯題複習」）
 
 1. 用 7.2 節的骨架建立新 HTML，檔名依第 4 節規則。
-2. 在 `app.js` 新增 `GRE.initXxx()` 初始化函式，盡量重用既有函式（載入單元、出題、計分）。
-3. 在 `app.js` 的 `NAV` 陣列加上新頁面。
-4. 新元件的樣式加在 `style.css` 最後，並用註解標示區塊名稱；只能使用既有 token。
-5. 更新本文件第 3 節目錄結構。
+2. 在 `app.js` 新增 `initXxx()` 函式（開頭照 7.3 節固定寫法），盡量重用既有函式，例如 `getWords()`、`buildQuiz()`、`getUnfamiliar()`。
+3. 把 `initXxx` 加到 `app.js` 最後的 `window.GRE = { ... }`，否則頁面呼叫不到。
+4. 在 `app.js` 的 `NAV` 陣列加上新頁面。
+5. 新元件的樣式加在 `style.css` 最後、「響應式」區塊之前，並用註解標示區塊名稱；只能使用既有 token。
+6. 更新本文件第 3 節目錄結構與 7.3 節 `app.js` 結構表。
+7. 執行第 10 節的檢查清單。
 
-### 8.5 修改樣式
+### 8.5 修改既有功能
+
+1. 先依 7.3 節找到對應的函式，只改需要的部分，不要順手重寫其他功能。
+2. 如果修改會影響資料格式，依第 11 節同步更新第 5 節與 `scripts/check-data.js`。
+3. 執行第 10 節的檢查清單，並確認其他頁面沒有被影響。
+
+### 8.6 修改樣式
 
 - 改顏色或字體：只改 `style.css` 的 token，不要逐一修改元件。
 - 不要改變 7.2 節的頁面骨架；若必須修改，所有頁面要一起改，並更新本文件。
