@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>題目練習｜GRE 單字練習</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <header id="site-nav"></header>
+  <main class="container">
+    <section class="page-head">
+      <h1>題目練習</h1>
+      <p class="lead">混合四種單字題型與 GRE 的 Text Completion、Sentence Equivalence。答錯的單字會自動加入「不熟」清單。</p>
+    </section>
+
+    <section id="quiz-setup" class="panel">
+      <div class="setup-grid">
+        <label class="field">
+          <span>單元</span>
+          <select id="unit-select"></select>
+        </label>
+        <label class="field">
+          <span>題數</span>
+          <select id="count-select">
+            <option value="10">10 題</option>
+            <option value="20">20 題</option>
+          </select>
+        </label>
+      </div>
+      <p class="muted" id="setup-info"></p>
+      <button type="button" class="btn btn-primary" id="start-btn">開始練習</button>
+    </section>
+
+    <div id="quiz-area" hidden></div>
+  </main>
+  <footer class="site-footer">GRE 單字練習</footer>
+  <script src="data/units.js"></script>
+  <script src="assets/app.js"></script>
+  <script>GRE.initQuiz();</script>
+</body>
+</html>

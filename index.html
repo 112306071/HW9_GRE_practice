@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>首頁｜GRE 單字練習</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <header id="site-nav"></header>
+  <main class="container">
+    <section class="hero">
+      <h1>每天幾張卡，把 <span class="accent-word">GRE</span> 單字變熟字</h1>
+      <p class="lead">依主題分組的 GRE 高頻單字，用小卡記憶，再用題目練習檢驗。答錯的字會自動加入「不熟」清單，方便集中複習。</p>
+    </section>
+
+    <div id="stats" class="stats"></div>
+
+    <div class="btn-row quick-actions">
+      <a class="btn btn-primary" href="flashcards.html">全部單字小卡</a>
+      <a class="btn btn-ghost" href="quiz.html">綜合題目練習</a>
+      <a class="btn btn-ghost" href="flashcards.html?unfamiliar=1">只複習不熟的字</a>
+    </div>
+
+    <h2>單元</h2>
+    <div id="unit-list" class="unit-list"></div>
+  </main>
+  <footer class="site-footer">GRE 單字練習</footer>
+  <script src="data/units.js"></script>
+  <script src="assets/app.js"></script>
+  <script>GRE.initHome();</script>
+</body>
+</html>

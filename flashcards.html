@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>單字小卡｜GRE 單字練習</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <header id="site-nav"></header>
+  <main class="container">
+    <section class="page-head">
+      <h1>單字小卡</h1>
+      <p class="lead">點擊卡片翻面看解釋；鍵盤可用 ← → 切換、空白鍵翻面。</p>
+    </section>
+
+    <div class="toolbar">
+      <label class="field">
+        <span>單元</span>
+        <select id="unit-select"></select>
+      </label>
+      <label class="check">
+        <input type="checkbox" id="only-unfamiliar">
+        只看不熟
+      </label>
+      <button type="button" class="btn btn-ghost" id="shuffle-btn">洗牌</button>
+    </div>
+
+    <div id="card-area"></div>
+
+    <div class="card-controls">
+      <button type="button" class="btn btn-ghost" id="prev-btn">← 上一張</button>
+      <span id="progress" class="progress-text"></span>
+      <button type="button" class="btn btn-ghost" id="next-btn">下一張 →</button>
+    </div>
+  </main>
+  <footer class="site-footer">GRE 單字練習</footer>
+  <script src="data/units.js"></script>
+  <script src="assets/app.js"></script>
+  <script>GRE.initFlashcards();</script>
+</body>
+</html>
